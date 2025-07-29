@@ -1,0 +1,42 @@
+# Example configuration file for n8n workflow builder
+
+n8n_instance:
+  name: "Production n8n"
+  url: "https://your-n8n-instance.com"
+  api_key_env: "N8N_API_KEY"  # References the key in .env file
+
+output_dir: "built_workflows"
+pulled_dir: "pulled_workflows"
+
+workflows:
+  # Direct workflow file reference
+  - name: "user-onboarding"
+    file: "workflows/user-onboarding.json"
+    description: "Handles new user onboarding process"
+  
+  # Template-based workflow
+  - name: "data-sync-customers"
+    template: "templates/data-sync.yaml"
+    description: "Syncs customer data between systems"
+    parameters:
+      source_system: "salesforce"
+      target_system: "hubspot"
+      sync_interval: "hourly"
+      fields:
+        - "name"
+        - "email"
+        - "company"
+  
+  # Another template instance
+  - name: "data-sync-products"
+    template: "templates/data-sync.yaml"
+    description: "Syncs product data between systems"
+    parameters:
+      source_system: "shopify"
+      target_system: "warehouse_db"
+      sync_interval: "daily"
+      fields:
+        - "sku"
+        - "name"
+        - "price"
+        - "inventory"

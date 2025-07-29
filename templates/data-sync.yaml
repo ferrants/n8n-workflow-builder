@@ -1,0 +1,75 @@
+{
+  "name": "{{ workflow_name }}",
+  "nodes": [
+    {
+      "parameters": {},
+      "name": "Start",
+      "type": "n8n-nodes-base.start",
+      "typeVersion": 1,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "resource": "{{ parameters.source_system }}",
+        "operation": "getAll",
+        "returnAll": true,
+        "options": {
+          "fields": {{ parameters.fields | tojson }}
+        }
+      },
+      "name": "Get {{ parameters.source_system | title }} Data",
+      "type": "n8n-nodes-base.{{ parameters.source_system }}",
+      "typeVersion": 1,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "resource": "{{ parameters.target_system }}",
+        "operation": "create",
+        "options": {
+          "batchSize": 100
+        }
+      },
+      "name": "Sync to {{ parameters.target_system | title }}",
+      "type": "n8n-nodes-base.{{ parameters.target_system }}",
+      "typeVersion": 1,
+      "position": [680, 300]
+    }
+  ],
+  "connections": {
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "Get {{ parameters.source_system | title }} Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get {{ parameters.source_system | title }} Data": {
+      "main": [
+        [
+          {
+            "node": "Sync to {{ parameters.target_system | title }}",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "timezone": "America/New_York"
+  },
+  "tags": [
+    {
+      "name": "data-sync"
+    },
+    {
+      "name": "{{ parameters.sync_interval }}"
+    }
+  ]
+}
