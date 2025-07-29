@@ -1,0 +1,493 @@
+{
+  "name": "{{ workflow_name }}",
+  "active": false,
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## 🗺️ STEP 1: Google Maps Data Extraction\n\nThis workflow starts by scraping Google Maps for business listings:\n\n**Process:** Uses HTTP requests to search Google Maps with queries like \"{{ parameters.search_term }}\"\n**Output:** Raw HTML containing business listings and website URLs\n**Key:** No APIs required - direct HTML scraping\n\n**Note:** Search term configured as: {{ parameters.search_term }}",
+        "height": 180,
+        "width": 350
+      },
+      "id": "a2d4608e-552d-447c-8481-3bf5f905d682",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [-976, 64],
+      "typeVersion": 1,
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## 🔗 STEP 2: Website URL Processing\n\nExtracts and cleans business website URLs:\n\n1. **Extract URLs:** JavaScript regex finds all website URLs in Google Maps data\n2. **Filter Google URLs:** Removes irrelevant domains (google.com, gstatic, etc.)\n3. **Remove Duplicates:** Eliminates duplicate websites\n4. **Limit:** Controls batch size for testing (adjust for production)\n\n**Result:** Clean list of actual business websites ready for email extraction",
+        "height": 200,
+        "width": 380
+      },
+      "id": "f54662ef-c1ce-474f-9318-4f4a6fd51507",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [-592, 64],
+      "typeVersion": 1,
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "## 🔄 STEP 3: Smart Website Scraping\n\nProcesses each website individually to prevent IP blocking:\n\n**Loop Over Items:** Processes websites one by one with built-in delays\n**Scrape Site:** Downloads HTML content from each business website\n**Wait Nodes:** Prevent rate limiting and IP blocking\n**Error Handling:** Continues processing even if some sites fail\n\n**Critical:** The batching and delays are essential for reliable operation at scale",
+        "height": 200,
+        "width": 380
+      },
+      "id": "c35b91b5-bf76-4d12-9e86-ebe3f1bb3778",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [-192, 64],
+      "typeVersion": 1,
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "## 📧 STEP 4: Email Extraction & Export\n\nFinal processing pipeline:\n\n1. **Extract Emails:** JavaScript regex finds all email addresses in website HTML\n2. **Filter Out Empties:** Removes websites with no emails found\n3. **Split Out:** Converts email arrays into individual items\n4. **Remove Duplicates:** Final deduplication across all sources\n          5. **Add to Sheet:** Exports clean email list to Google Sheets → \"{{ parameters.google_sheet_tab }}\"\n\n**Result:** Organized database of business emails ready for outreach",
+        "height": 220,
+        "width": 400
+      },
+      "id": "b65e5421-d1fb-4bcc-b1a9-1bb75d613ddc",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [208, 32],
+      "typeVersion": 1,
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {},
+      "id": "e5b0cedc-b302-409a-a646-cb4d9b5c5a1e",
+      "name": "When clicking 'Test workflow'",
+      "type": "n8n-nodes-base.manualTrigger",
+      "position": [-752, 384],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "65169ef8-7a94-4ab4-a783-1385fb822721",
+      "name": "Remove Duplicates",
+      "type": "n8n-nodes-base.removeDuplicates",
+      "position": [48, 384],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "21fd2a88-0340-443c-8246-9b64a1ac9b00",
+      "name": "Loop Over Items",
+      "type": "n8n-nodes-base.splitInBatches",
+      "position": [448, 384],
+      "typeVersion": 3
+    },
+    {
+      "parameters": {
+        "amount": 1
+      },
+      "id": "80a14951-26ce-4e23-9c9f-63ffe1036847",
+      "name": "Wait",
+      "type": "n8n-nodes-base.wait",
+      "position": [816, 480],
+      "webhookId": "19cc6ed4-4fe7-485b-b879-c679e4b3374d",
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "maxItems": {{ parameters.limit | default(10) }}
+      },
+      "id": "4ee080ad-7f6e-4bcb-9aea-c6adb5660138",
+      "name": "Limit",
+      "type": "n8n-nodes-base.limit",
+      "position": [240, 384],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {},
+      "id": "156eb3e7-840f-4c05-a801-295560841789",
+      "name": "Wait1",
+      "type": "n8n-nodes-base.wait",
+      "position": [640, 320],
+      "webhookId": "0fe34756-6e43-4603-8891-5747a9a6500a",
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "emails",
+        "options": {}
+      },
+      "id": "e44b0a64-2597-48c1-8881-69bfe53a2e15",
+      "name": "Split Out",
+      "type": "n8n-nodes-base.splitOut",
+      "position": [992, 320],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = {{ '$' }}input.first().json.data\nconst regex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.(?!jpeg|jpg|png|gif|webp|svg)[a-zA-Z]{2,}/g\nconst emails = input.match(regex)\nreturn {json: {emails:emails}}"
+      },
+      "id": "16eecfa4-4ad0-4f00-af1e-d904e9a25976",
+      "name": "Extract Emails",
+      "type": "n8n-nodes-base.code",
+      "position": [992, 480],
+      "typeVersion": 2,
+      "alwaysOutputData": true,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = {{ '$' }}input.first().json.data\nconst regex = /https?:\\/\\/[^\\/\\s\"'>]+/g\nconst websites = input.match(regex)\nreturn websites.map(website => ({json:{website}}))"
+      },
+      "id": "6258cb58-16b4-453a-89a2-99608cdda470",
+      "name": "Extract URLs",
+      "type": "n8n-nodes-base.code",
+      "position": [-352, 384],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "url": "https://www.google.com/maps/search/{{ parameters.search_term | urlencode }}",
+        "options": {
+          "allowUnauthorizedCerts": true,
+          "response": {
+            "response": {
+              "fullResponse": true
+            }
+          }
+        }
+      },
+      "id": "eed2101c-a765-4422-9f5a-dc87bd812e86",
+      "name": "Scrape Google Maps",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [-560, 384],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "url": "={{ '{{' }} {{ '$' }}json.website {{ '}}' }}",
+        "options": {
+          "redirect": {
+            "redirect": {
+              "followRedirects": false
+            }
+          }
+        }
+      },
+      "id": "6edb47ed-d620-4b2b-bbf1-cc71e02b4b86",
+      "name": "Scrape Site",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [640, 480],
+      "typeVersion": 4.2,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 2,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "a6786c58-424a-409a-b87f-8a7592cb7944",
+              "operator": {
+                "type": "array",
+                "operation": "exists",
+                "singleValue": true
+              },
+              "leftValue": "={{ '{{' }} {{ '$' }}json.emails {{ '}}' }}",
+              "rightValue": ""
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "47a02230-c539-422e-b48e-43c31b0b3526",
+      "name": "Filter Out Empties",
+      "type": "n8n-nodes-base.filter",
+      "position": [816, 320],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 2,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "bf0a5053-9660-457c-9581-964793bb6d7d",
+              "operator": {
+                "type": "string",
+                "operation": "notContains"
+              },
+              "leftValue": "={{ '{{' }} {{ '$' }}json.website {{ '}}' }}",
+              "rightValue": "schema"
+            },
+            {
+              "id": "9110b9e0-12aa-45cc-bde0-9eda8c10970e",
+              "operator": {
+                "type": "string",
+                "operation": "notContains"
+              },
+              "leftValue": "={{ '{{' }} {{ '$' }}json.website {{ '}}' }}",
+              "rightValue": "google"
+            },
+            {
+              "id": "fb9b6ed6-96a5-4560-ab10-b8a4b9a61a2b",
+              "operator": {
+                "type": "string",
+                "operation": "notContains"
+              },
+              "leftValue": "={{ '{{' }} {{ '$' }}json.website {{ '}}' }}",
+              "rightValue": "gg"
+            },
+            {
+              "id": "10500c0b-cdbd-4816-aba3-df60d69845dc",
+              "operator": {
+                "type": "string",
+                "operation": "notContains"
+              },
+              "leftValue": "={{ '{{' }} {{ '$' }}json.website {{ '}}' }}",
+              "rightValue": "gstatic"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "9e173a3d-37ce-45e5-b3f3-9938c33c1689",
+      "name": "Filter Google URLs",
+      "type": "n8n-nodes-base.filter",
+      "position": [-160, 384],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "84349faa-9238-475e-9d1c-6ef64e1346f6",
+      "name": "Remove Duplicates (2)",
+      "type": "n8n-nodes-base.removeDuplicates",
+      "position": [1200, 320],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "{{ parameters.google_sheet_url }}",
+          "mode": "url"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "{{ parameters.google_sheet_tab }}",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [
+            "emails"
+          ],
+          "schema": [
+            {
+              "id": "emails",
+              "displayName": "emails",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "4fb268f7-af1c-4093-b57a-b73f1286cf3f",
+      "name": "Add to Sheet (or whatever you want!)",
+      "type": "n8n-nodes-base.googleSheets",
+      "position": [1392, 320],
+      "typeVersion": 4.5,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "{{ parameters.google_sheets_credential_id }}",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Extract Emails",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limit": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait1": {
+      "main": [
+        [
+          {
+            "node": "Filter Out Empties",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Remove Duplicates (2)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Scrape Site": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract URLs": {
+      "main": [
+        [
+          {
+            "node": "Filter Google URLs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Emails": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [
+          {
+            "node": "Wait1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Scrape Site",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Remove Duplicates": {
+      "main": [
+        [
+          {
+            "node": "Limit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter Google URLs": {
+      "main": [
+        [
+          {
+            "node": "Remove Duplicates",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter Out Empties": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Scrape Google Maps": {
+      "main": [
+        [
+          {
+            "node": "Extract URLs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Remove Duplicates (2)": {
+      "main": [
+        [
+          {
+            "node": "Add to Sheet (or whatever you want!)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking 'Test workflow'": {
+      "main": [
+        [
+          {
+            "node": "Scrape Google Maps",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

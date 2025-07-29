@@ -1,6 +1,6 @@
 # n8n Workflow Builder
 
-A Python application for building, managing, and deploying n8n workflows with configuration-driven approach.
+A Python library for building, managing, and deploying n8n workflows with a configuration-driven approach. This package provides the core tooling while allowing you to maintain your own private repository of workflows and templates.
 
 ## Features
 
@@ -13,37 +13,122 @@ A Python application for building, managing, and deploying n8n workflows with co
 
 ## Installation
 
+### Install from PyPI (Recommended)
 ```bash
-# Install the package
-pip install -e .
+# Install the latest stable version
+pip install n8n-workflow-builder
 
-# Install with development dependencies
-pip install -e ".[dev]"
+# Install with development dependencies (for contributing)
+pip install n8n-workflow-builder[dev]
 ```
 
-## Quick Start
+### Install from Source
+```bash
+# Clone and install in development mode
+git clone https://github.com/ferrants/n8n-workflow-builder.git
+cd n8n-workflow-builder
+pip install -e .
+```
 
-1. **Set up environment variables**:
-   ```bash
-   cp .env.example .env
-   # Edit .env with your n8n API key and instance URL
-   ```
+## Setting Up Your Workflow Repository
 
-2. **Create a configuration file**:
-   ```bash
-   cp config.example.yaml config.yaml
-   # Edit config.yaml with your workflow definitions
-   ```
+After installing the library, you'll need to create your own repository to store workflows, templates, and configuration. This repository should be private to your organization.
 
-3. **Build workflows**:
+### 1. Create Your Workflow Repository
+
+```bash
+# Create a new repository for your workflows
+mkdir my-n8n-workflows
+cd my-n8n-workflows
+git init
+
+# Create the recommended directory structure
+mkdir -p templates workflows built_workflows pulled_workflows
+```
+
+### 2. Set Up Configuration Files
+
+Create your environment file:
+```
+# Create .env file with your n8n credentials
+N8N_API_KEY=your_n8n_api_key_here
+```
+
+Create your configuration file:
+```
+n8n_instance:
+  name: "Production n8n"
+  url: "https://your-n8n-instance.com"
+  api_key_env: "N8N_API_KEY"
+
+output_dir: "built_workflows"
+pulled_dir: "pulled_workflows"
+
+workflows:
+  # Add your workflow definitions here
+  # See examples below
+```
+
+### 3. Set Up Git Ignore
+
+```
+# Environment files
+.env
+.env.local
+
+# Generated workflows
+built_workflows/
+pulled_workflows/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+.coverage
+.pytest_cache/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+```
+
+### 4. Quick Start
+
+1. **Build workflows**:
    ```bash
    n8n-builder build config.yaml
    ```
 
-4. **Push to n8n**:
+2. **Push to n8n**:
    ```bash
    n8n-builder push config.yaml
    ```
+
+### 5. Recommended Repository Structure
+
+```
+my-n8n-workflows/
+├── templates/                 # Jinja2 workflow templates
+│   ├── data-sync.yaml        # Reusable templates
+│   └── email-scraper.yaml    # Parameterized workflows
+├── workflows/                # Static workflow files
+│   └── legacy-workflow.json  # Direct workflow files
+├── built_workflows/          # Generated workflows (gitignored)
+├── pulled_workflows/         # Downloaded workflows (gitignored)
+├── config.yaml              # Workflow definitions
+├── .env                     # Environment variables (gitignored)
+├── .gitignore              # Git ignore rules
+└── README.md               # Your workflow documentation
+```
 
 ## Configuration
 
@@ -51,7 +136,6 @@ pip install -e ".[dev]"
 
 ```env
 N8N_API_KEY=your_n8n_api_key_here
-N8N_WEBHOOK_URL=your_n8n_webhook_url_here
 ```
 
 ### Configuration File (config.yaml)
@@ -87,35 +171,131 @@ workflows:
 ### Build Workflows
 Build all workflows defined in the configuration:
 ```bash
+# Build all workflows
 n8n-builder build config.yaml
+
+# Build a specific workflow by name
+n8n-builder build config.yaml --workflow user-onboarding
+n8n-builder build config.yaml -w user-onboarding
 ```
 
 ### Pull Workflows
 Download workflows from your n8n instance:
 ```bash
+# Pull all workflows
 n8n-builder pull config.yaml
+
+# Pull a specific workflow by name
+n8n-builder pull config.yaml --workflow user-onboarding
+n8n-builder pull config.yaml -w user-onboarding
 ```
 
 ### Push Workflows
 Upload built workflows to your n8n instance:
 ```bash
+# Push all workflows
 n8n-builder push config.yaml
+
+# Push a specific workflow by name
+n8n-builder push config.yaml --workflow user-onboarding
+n8n-builder push config.yaml -w user-onboarding
 
 # Dry run to see what would be uploaded
 n8n-builder push config.yaml --dry-run
+
+# Dry run for a specific workflow
+n8n-builder push config.yaml --workflow my-workflow --dry-run
 ```
 
 ### Compare Workflows
 Compare built workflows with pulled workflows:
 ```bash
+# Compare all workflows
 n8n-builder compare config.yaml
+
+# Compare a specific workflow by name
+n8n-builder compare config.yaml --workflow user-onboarding
+n8n-builder compare config.yaml -w user-onboarding
 
 # Output as JSON
 n8n-builder compare config.yaml --format json
+
+# Compare single workflow with JSON output
+n8n-builder compare config.yaml --workflow my-workflow --format json
 ```
 
-## Project Structure
+## Library Architecture
 
+The n8n-workflow-builder library is structured as follows:
+
+```
+n8n_builder/                  # Core library package
+├── models/                   # Data models
+│   └── config.py            # Configuration models
+├── services/                # Business logic
+│   ├── secrets.py           # Secrets management
+│   ├── builder.py           # Workflow builder
+│   ├── n8n_client.py        # n8n API client
+│   └── comparator.py        # Workflow comparison
+├── utils/                   # Utilities
+│   └── validation.py        # Validation helpers
+└── cli.py                   # Command line interface
+```
+
+## Publishing the Library
+
+### For Library Maintainers
+
+To publish this library to PyPI:
+
+1. **Update version in pyproject.toml**
+2. **Build the package**:
+   ```bash
+   python -m build
+   ```
+3. **Upload to PyPI**:
+   ```bash
+   python -m twine upload dist/*
+   ```
+
+### Package Configuration
+
+The library should be configured in `pyproject.toml` with:
+
+```toml
+[project]
+name = "n8n-workflow-builder"
+version = "1.0.0"
+description = "A Python library for building, managing, and deploying n8n workflows"
+authors = [{name = "Your Name", email = "your.email@example.com"}]
+license = {text = "MIT"}
+readme = "README.md"
+requires-python = ">=3.8"
+dependencies = [
+    "click>=8.0.0",
+    "pyyaml>=6.0",
+    "python-dotenv>=0.19.0",
+    "requests>=2.25.0",
+    "jinja2>=3.0.0",
+    "jsonschema>=4.0.0"
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-cov>=4.0.0",
+    "black>=22.0.0",
+    "flake8>=5.0.0",
+    "mypy>=1.0.0"
+]
+
+[project.scripts]
+n8n-builder = "n8n_builder.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/ferrants/n8n-workflow-builder"
+Repository = "https://github.com/ferrants/n8n-workflow-builder"
+Issues = "https://github.com/ferrants/n8n-workflow-builder/issues"
 ```
 n8n_workflows/
 ├── src/n8n_builder/           # Main package
@@ -139,13 +319,87 @@ n8n_workflows/
 └── pyproject.toml        # Package configuration
 ```
 
-## Template System
+## Creating Templates
+
+### Template System Overview
 
 Templates use Jinja2 syntax and have access to:
 
 - `workflow_name`: The name of the workflow being built
 - `parameters`: Parameters defined in the configuration
 - `secrets`: Non-sensitive configuration values
+
+### Template Format Requirements
+
+- **Templates must be JSON format** (despite `.yaml` extension)
+- Templates are processed by Jinja2 before being parsed as JSON
+- **Critical**: n8n expressions like `{{ $json.field }}` must be escaped
+
+### Creating Templates from Existing Workflows
+
+1. **Pull an existing workflow**:
+   ```bash
+   n8n-builder pull config.yaml --workflow my-workflow
+   ```
+
+2. **Copy and parameterize**:
+   ```bash
+   cp pulled_workflows/my-workflow.json templates/my-template.yaml
+   ```
+
+3. **Remove volatile fields** (id, createdAt, updatedAt, versionId, shared, etc.)
+
+4. **Parameterize values**:
+   ```json
+   {
+     "name": "{{ workflow_name }}",
+     "nodes": [
+       {
+         "parameters": {
+           "url": "https://api.example.com/{{ parameters.endpoint }}",
+           "limit": {{ parameters.limit | default(10) }}
+         }
+       }
+     ]
+   }
+   ```
+
+5. **Escape n8n expressions**:
+   ```json
+   {
+     "parameters": {
+       "leftValue": "={{ '{{' }} {{ '$' }}json.website {{ '}}' }}",
+       "jsCode": "const input = {{ '$' }}input.first().json.data"
+     }
+   }
+   ```
+
+6. **Add credential references**:
+   ```json
+   {
+     "credentials": {
+       "googleSheetsOAuth2Api": {
+         "id": "{{ parameters.google_sheets_credential_id }}",
+         "name": "Google Sheets account"
+       }
+     }
+   }
+   ```
+
+### Template Testing Workflow
+
+1. **Build and compare**:
+   ```bash
+   n8n-builder build config.yaml --workflow my-workflow
+   n8n-builder compare config.yaml --workflow my-workflow
+   ```
+
+2. **Test deployment**:
+   ```bash
+   n8n-builder push config.yaml --workflow my-workflow --dry-run
+   ```
+
+### Example Template
 
 Example template (`templates/data-sync.yaml`):
 ```json
@@ -156,14 +410,58 @@ Example template (`templates/data-sync.yaml`):
       "name": "Get {{ parameters.source_system | title }} Data",
       "type": "n8n-nodes-base.{{ parameters.source_system }}",
       "parameters": {
-        "fields": {{ parameters.fields | tojson }}
+        "fields": {{ parameters.fields | tojson }},
+        "url": "{{ parameters.api_url | urlencode }}"
+      },
+      "credentials": {
+        "{{ parameters.credential_type }}": {
+          "id": "{{ parameters.credential_id }}",
+          "name": "{{ parameters.credential_name }}"
+        }
       }
     }
   ]
 }
 ```
 
-## Development
+## Best Practices for Your Workflow Repository
+
+### Version Control
+- **Keep templates and config in git**: Track your workflow definitions and templates
+- **Exclude sensitive data**: Never commit `.env` files or API keys
+- **Exclude generated files**: Don't commit `built_workflows/` or `pulled_workflows/`
+
+### Organization
+- **Use descriptive names**: Name workflows and templates clearly
+- **Group related workflows**: Use prefixes or directories for organization
+- **Document parameters**: Add comments in config.yaml explaining parameters
+
+### Security
+- **Use environment variables**: Store API keys and secrets in `.env`
+- **Separate environments**: Use different config files for dev/staging/prod
+- **Credential management**: Reference credential IDs as parameters, not hardcoded
+
+### Testing
+- **Compare before deploying**: Always run compare to check differences
+- **Use dry-run**: Test deployments with `--dry-run` flag
+- **Single workflow testing**: Use `--workflow` flag during development
+
+### Example Workflow Repository
+
+See our [example workflow repository](https://github.com/ferrants/n8n-workflows-example) for a complete setup with:
+- Multiple environment configurations
+- Reusable templates
+- CI/CD pipeline examples
+- Documentation templates
+
+## Contributing to the Library
+
+### Development Setup
+```bash
+git clone https://github.com/ferrants/n8n-workflow-builder.git
+cd n8n-workflow-builder
+pip install -e ".[dev]"
+```
 
 ### Running Tests
 ```bash
@@ -178,11 +476,6 @@ make format
 ### Linting
 ```bash
 make lint
-```
-
-### Building Package
-```bash
-make build
 ```
 
 ## Main Components
