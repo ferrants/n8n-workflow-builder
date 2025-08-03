@@ -115,32 +115,32 @@ help:
 	@echo "  clean     - Clean generated files"
 
 build:
-	n8n-builder build config.yaml
+	n8n-workflow-builder build config.yaml
 
 push:
-	n8n-builder push config.yaml
+	n8n-workflow-builder push config.yaml
 
 pull:
-	n8n-builder pull config.yaml
+	n8n-workflow-builder pull config.yaml
 
 compare:
-	n8n-builder compare config.yaml
+	n8n-workflow-builder compare config.yaml
 
 clean:
 	rm -rf built_workflows/* pulled_workflows/*
 
 # Environment-specific commands
 build-dev:
-	n8n-builder build environments/dev.yaml
+	n8n-workflow-builder build environments/dev.yaml
 
 push-dev:
-	n8n-builder push environments/dev.yaml
+	n8n-workflow-builder push environments/dev.yaml
 
 build-prod:
-	n8n-builder build environments/prod.yaml
+	n8n-workflow-builder build environments/prod.yaml
 
 push-prod:
-	n8n-builder push environments/prod.yaml --dry-run
+	n8n-workflow-builder push environments/prod.yaml --dry-run
 	@echo "Remove --dry-run to actually deploy to production"
 ```
 
@@ -201,7 +201,7 @@ logs/
 2. Update the configuration files with your specific workflows
 3. Create templates based on your existing n8n workflows
 4. Set up your environment variables
-5. Test with `n8n-builder build config.yaml`
-6. Deploy with `n8n-builder push config.yaml --dry-run` first
+5. Test with `n8n-workflow-builder build config.yaml`
+6. Deploy with `n8n-workflow-builder push config.yaml --dry-run` first
 
 For more information, see the [n8n-workflow-builder documentation](https://github.com/ferrants/n8n-workflow-builder).

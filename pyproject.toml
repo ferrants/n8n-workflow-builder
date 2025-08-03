@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "n8n-workflow-builder"
-version = "0.1.0"
+version = "0.2.0"
 description = "A Python library for building, managing, and deploying n8n workflows with configuration-driven templates"
 authors = [{name = "Matt Ferrante", email = "matt@heyferrante.com"}]
 license = {text = "MIT"}
@@ -40,7 +40,7 @@ dev = [
 ]
 
 [project.scripts]
-n8n-builder = "n8n_builder.cli:main"
+n8n-workflow-builder = "n8n_workflow_builder.cli:main"
 
 [project.urls]
 Homepage = "https://github.com/ferrants/n8n-workflow-builder"

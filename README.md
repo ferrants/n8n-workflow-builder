@@ -105,12 +105,12 @@ Thumbs.db
 
 1. **Build workflows**:
    ```bash
-   n8n-builder build config.yaml
+   n8n-workflow-builder build config.yaml
    ```
 
 2. **Push to n8n**:
    ```bash
-   n8n-builder push config.yaml
+   n8n-workflow-builder push config.yaml
    ```
 
 ### 5. Recommended Repository Structure
@@ -172,56 +172,56 @@ workflows:
 Build all workflows defined in the configuration:
 ```bash
 # Build all workflows
-n8n-builder build config.yaml
+n8n-workflow-builder build config.yaml
 
 # Build a specific workflow by name
-n8n-builder build config.yaml --workflow user-onboarding
-n8n-builder build config.yaml -w user-onboarding
+n8n-workflow-builder build config.yaml --workflow user-onboarding
+n8n-workflow-builder build config.yaml -w user-onboarding
 ```
 
 ### Pull Workflows
 Download workflows from your n8n instance:
 ```bash
 # Pull all workflows
-n8n-builder pull config.yaml
+n8n-workflow-builder pull config.yaml
 
 # Pull a specific workflow by name
-n8n-builder pull config.yaml --workflow user-onboarding
-n8n-builder pull config.yaml -w user-onboarding
+n8n-workflow-builder pull config.yaml --workflow user-onboarding
+n8n-workflow-builder pull config.yaml -w user-onboarding
 ```
 
 ### Push Workflows
 Upload built workflows to your n8n instance:
 ```bash
 # Push all workflows
-n8n-builder push config.yaml
+n8n-workflow-builder push config.yaml
 
 # Push a specific workflow by name
-n8n-builder push config.yaml --workflow user-onboarding
-n8n-builder push config.yaml -w user-onboarding
+n8n-workflow-builder push config.yaml --workflow user-onboarding
+n8n-workflow-builder push config.yaml -w user-onboarding
 
 # Dry run to see what would be uploaded
-n8n-builder push config.yaml --dry-run
+n8n-workflow-builder push config.yaml --dry-run
 
 # Dry run for a specific workflow
-n8n-builder push config.yaml --workflow my-workflow --dry-run
+n8n-workflow-builder push config.yaml --workflow my-workflow --dry-run
 ```
 
 ### Compare Workflows
 Compare built workflows with pulled workflows:
 ```bash
 # Compare all workflows
-n8n-builder compare config.yaml
+n8n-workflow-builder compare config.yaml
 
 # Compare a specific workflow by name
-n8n-builder compare config.yaml --workflow user-onboarding
-n8n-builder compare config.yaml -w user-onboarding
+n8n-workflow-builder compare config.yaml --workflow user-onboarding
+n8n-workflow-builder compare config.yaml -w user-onboarding
 
 # Output as JSON
-n8n-builder compare config.yaml --format json
+n8n-workflow-builder compare config.yaml --format json
 
 # Compare single workflow with JSON output
-n8n-builder compare config.yaml --workflow my-workflow --format json
+n8n-workflow-builder compare config.yaml --workflow my-workflow --format json
 ```
 
 ## Library Architecture
@@ -229,8 +229,8 @@ n8n-builder compare config.yaml --workflow my-workflow --format json
 The n8n-workflow-builder library is structured as follows:
 
 ```
-n8n_builder/                  # Core library package
-├── models/                   # Data models
+n8n_workflow_builder/        # Core library package
+├── models/                  # Data models
 │   └── config.py            # Configuration models
 ├── services/                # Business logic
 │   ├── secrets.py           # Secrets management
@@ -290,7 +290,7 @@ dev = [
 ]
 
 [project.scripts]
-n8n-builder = "n8n_builder.cli:main"
+n8n-workflow-builder = "n8n_workflow_builder.cli:main"
 
 [project.urls]
 Homepage = "https://github.com/ferrants/n8n-workflow-builder"
@@ -298,7 +298,7 @@ Repository = "https://github.com/ferrants/n8n-workflow-builder"
 Issues = "https://github.com/ferrants/n8n-workflow-builder/issues"
 ```
 n8n_workflows/
-├── src/n8n_builder/           # Main package
+├── src/n8n_workflow_builder/ # Main package
 │   ├── models/                # Data models
 │   │   └── config.py         # Configuration models
 │   ├── services/             # Business logic
@@ -339,7 +339,7 @@ Templates use Jinja2 syntax and have access to:
 
 1. **Pull an existing workflow**:
    ```bash
-   n8n-builder pull config.yaml --workflow my-workflow
+   n8n-workflow-builder pull config.yaml --workflow my-workflow
    ```
 
 2. **Copy and parameterize**:
@@ -390,13 +390,13 @@ Templates use Jinja2 syntax and have access to:
 
 1. **Build and compare**:
    ```bash
-   n8n-builder build config.yaml --workflow my-workflow
-   n8n-builder compare config.yaml --workflow my-workflow
+   n8n-workflow-builder build config.yaml --workflow my-workflow
+   n8n-workflow-builder compare config.yaml --workflow my-workflow
    ```
 
 2. **Test deployment**:
    ```bash
-   n8n-builder push config.yaml --workflow my-workflow --dry-run
+   n8n-workflow-builder push config.yaml --workflow my-workflow --dry-run
    ```
 
 ### Example Template

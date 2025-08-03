@@ -3,7 +3,7 @@
 import pytest
 import tempfile
 import os
-from src.n8n_builder.models.config import (
+from src.n8n_workflow_builder.models.config import (
     BuildConfig,
     N8nInstance,
     WorkflowReference,

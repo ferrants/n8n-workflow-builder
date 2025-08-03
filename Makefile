@@ -10,7 +10,7 @@ dev-install:
 
 # Run tests
 test:
-	pytest tests/ -v --cov=src/n8n_builder --cov-report=html
+	pytest tests/ -v --cov=src/n8n_workflow_builder --cov-report=html
 
 # Run linting
 lint:
@@ -37,13 +37,13 @@ build: clean
 
 # Example commands
 example-build:
-	n8n-builder build config.example.yaml
+	n8n-workflow-builder build config.example.yaml
 
 example-pull:
-	n8n-builder pull config.example.yaml
+	n8n-workflow-builder pull config.example.yaml
 
 example-push:
-	n8n-builder push config.example.yaml --dry-run
+	n8n-workflow-builder push config.example.yaml --dry-run
 
 example-compare:
-	n8n-builder compare config.example.yaml
+	n8n-workflow-builder compare config.example.yaml
