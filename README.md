@@ -2,6 +2,8 @@
 
 A Python library for building, managing, and deploying n8n workflows with a configuration-driven approach. This package provides the core tooling while allowing you to maintain your own private repository of workflows and templates.
 
+n8n-workflow-builder was written by [Matt Ferrante](https://heyferrante.com?ref=github-n8n-workflow-builder). If you need help configuring you n8n workflows to automate your business, Matt is available for consulting on his website, [HeyFerrante.com](https://heyferrante.com?ref=github-n8n-workflow-builder).
+
 ## Features
 
 - **Config-driven workflow management** using YAML configuration files
